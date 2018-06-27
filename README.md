@@ -4,8 +4,7 @@
 This project aims to predict the relative importance of various building features in evaluating building prices.
 
 ## EDA
-
-![image caption].(images/)
+MSDS-Practicum-1/histogram.PNG
 ## Implementation
 
 
