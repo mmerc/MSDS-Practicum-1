@@ -10,7 +10,7 @@ Purchasing a home is a major milestone in life.  Individuals spend an enormous a
 There were several objectives I wanted to acheive during this project.  First, I wanted to develop a predictive model that could potentially be applied in a similar geographical areas.  I also wanted to explore various regression methods and functions.  Another goal was to identify which features were most important to the model.  Therefore, I formulated a class project to apply linear regression machine learning techniques to predict the value of a home based on its structural features.
 
 ## PDF Report
-A detailed PDF file on this project can be found at https://github.com/mmerc/MSDS-Practicum-1/blob/master/MercierFinalPracticum1.pdf.
+A detailed PDF file on this project can be found athttps://github.com/mmerc/MSDS-Practicum-1/blob/master/MercierFinalPracticum1.2.docx.
 
 ## Summary Video
 The video presentation of this project can be viewed at https://www.youtube.com/watch?v=-yyfe9LdPDc&feature=youtu.be.
