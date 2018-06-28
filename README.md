@@ -7,7 +7,7 @@ This project aims to predict the relative importance of various building feature
 MSDS-Practicum-1/histogram.PNG
 ## Implementation
 
-
+https://github.com/mmerc/MSDS-Practicum-1/blob/master/MercierFinalPracticum1.pdf
 ## Analysis
 * linear regression
 * cluster
