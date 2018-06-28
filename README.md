@@ -1,21 +1,18 @@
-# MSDS-Practicum-1
-# Maria Mercier
+# Predicting The Value of a Home Based on Structural Features
+## Maria Mercier
+
 ## Project overview
-This project aims to predict the relative importance of various building features in evaluating building prices.
 
-## EDA
-MSDS-Practicum-1/histogram.PNG
-## Implementation
+Purchasing a home is a major milestone in life.  Individuals spend an enormous amount of time researching the various characteristics of a house to find the best value. One helpful resource would be to predict the value of homes based on the structural features and then add other characteristics to that for comparison purposes.  This project was developed to examine such a concept.  
 
-https://github.com/mmerc/MSDS-Practicum-1/blob/master/MercierFinalPracticum1.pdf
-## Analysis
-* linear regression
-* cluster
+There were several objectives I wanted to acheive during this project.  First, I wanted to develop a predictive model that could potentially be applied in a similar geographical areas.  I also wanted to explore various regression methods and functions.  Another goal was to identify which features were most important to the model.  Therefore, I formulated a class project to apply linear regression machine learning techniques to predict the value of a home based on its structural features.
+
+## PDF Report
+A detailed PDF file on this project can be found at https://github.com/mmerc/MSDS-Practicum-1/blob/master/MercierFinalPracticum1.pdf.
+
+## Summary Video
+The video presentation of this project can be viewed at https://www.youtube.com/watch?v=-yyfe9LdPDc&feature=youtu.be.
+
+I look forward to your comments and questions.
 
 
-## Conclusions
-
-## References
-link to your video
-
-[Spachtholz, P.  (n.d.)  Exploratory Analysis - Zillow](https://www.kaggle.com/philippsp/exploratory-analysis-zillow)
