@@ -7,27 +7,21 @@ output:
   html_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 # Introduction
 
+Purchasing a home is a major milestone in life.  Individuals spend an enormous amount of time researching the various characteristics of a house to find the best value. One helpful resource would be to predict the value of homes based on the structural features and then add other characteristics to that for comparison purposes.  This project was developed to examine such a concept.  
 
-Purchasing a home is a major milestone in life.  Individuals spend an enormous amount of time researching the various characteristics of a house to find the best value. One helpful resource would be to predict the value of homes based on the structural features and then add other characteristics to that to compare the value of homes.  This project was developed to examine such a concept.  I wanted to develop a predictive model that could potentially be applied in a similar geographical areas.  Therefore, I formulated a class project to apply a linear regression machine learning technique to predict the value of a home based on its structural features.
+There were several objectives I wanted to acheive during this course.  First, I wanted to develop a predictive model that could potentially be applied in a similar geographical areas.  I also wanted to explore various regression methods and functions.  Another goal was to identify which features were most important to the model.  Therefore, I formulated a class project to apply a linear regression machine learning techniques to predict the value of a home based on its structural features.
 
-The project consisted of using data from the Kaggle website titled Zillow properties_2016.  This dataset containing 58 features of homes in the Los Angeles area.  The dataset has almost 3 million observations.  The dependent variable is value of a home and is labeled "building_value."  The independent variables will consist of structural features of the homes in the dataset such as the number of bathrooms, number of bedrooms, etc.  The project is limited to structural features so that this model may be applicable in other similar geographical areas (with additional data from datasets in different geographical areas).  Various linear regression models were explored to find the model with the best performance.  A multiple linear regression model was developed in R Studio.
+The project consisted of using data from the Kaggle website titled Zillow "properties_2016".  The project is limited to structural features so that this model may be applicable in other similar geographical areas (with additional data from datasets in different geographical areas).  
 
-The prepatory phase for developing the prediction model included importing data, exploration of the data, selecting the features, and data cleansing.  Regression models were created using various regression functions in R and compared.  This paper decribes each step in the process along with the code and output.
+The prepatory phase for developing the prediction model included importing data, exploration of the data, selecting the features, and data cleansing.  Regression models were created using various regression functions in R and compared.  This paper decribes each step in the process along with the code and output.  You may view a twelve and a half minute video summarizint this project on YouTube at https://www.youtube.com/watch?v=-yyfe9LdPDc&feature=youtu.be.
 
-### Load necessary Packages.
-load anticipated packages and libraries per Spachtholz (2017) found at https://www.kaggle.com/philippsp/exploratory-analysis-zillow
+```{r include=FALSE}
+#load anticipated packages and libraries per Spachtholz (2017) found at https://www.kaggle.com/philippsp/exploratory-analysis-zillow
 
-```{r}
-install.packages('data.table')
 library(data.table)
-install.packages('dtplyr')
 library(dtplyr)
-install.packages("ggplot2")
 library(ggplot2)
 library(stringr)
 library(DT)
@@ -40,31 +34,32 @@ library(plyr)
 library(dplyr)
 ```
 
-### Load dataset
-The Zillow dataset properties_2016.csv.zip from https://www.kaggle.com/c/zillow-prize-1/data is loaded.
-
-```{r}
+## Dataframe
+The real estate data set is the 2016 Zillow properties and was taken from the Kaggle web site.  This data set consisted of 3 million observations on 58 features from homes in the Los Angeles area.  The Zillow data set contained features on various information about a home, such as living area, types of rooms, the presence of a fire place, number of garages, the presence of a pool etc.  It also contained geographical information such as longitude and latitude, land codes, zoning, and region of the city. The dataset properties_2016.csv.zip was obtained from https://www.kaggle.com/c/zillow-prize-1/data.
+```{r include=FALSE}
 properties_2016 <- read.csv("C:/Users/maria/Desktop/data/properties_2016.csv", stringsAsFactors=TRUE)
 ```
 
 # Exploratory Data Analysis and Data Cleansing
-The exploratory data analysis included examining the data frame for feature definitions, missing values, duplicate features and extreme values.  This data set containing all of these issues.  The first step was to view the structure of the dataframe.
-```{r}
+The exploratory data analysis included examining the data frame for feature definitions, missing values, duplicate features and extreme values.  This data set containing all of these issues.  The first step was to view the structure of the dataframe and is shown below.
+```{r echo=FALSE}
 str(properties_2016)
 ```
 
-The goal of this project is to predict the value of a home from its structural features.  The response variable is the column  "structuretaxvaluedollarcnt"" in the original dataframe, which is continuous type data.  The machine learning model will be a multiple linear regression model as recommended by Lantz (2015) p. 21.  The next step was to create a new variable for dataframe to preserve original dataset.
+The goal of this project is to predict the value of a home from its structural features.  The response variable is the column  "structuretaxvaluedollarcnt"" in the original dataframe, which is continuous type data.  The machine learning model will be a multiple linear regression model as recommended by Lantz (2015 p. 21).  The next step was to create a new variable for dataframe to preserve original dataset.
 ```{r}
 properties <- properties_2016
 ```
 
-View the new object to confirm dataset.
-```{r}
+
+```{r include=FALSE}
+
 head(properties)
 ```
 
 Next, I changed column names to more sensical names as done by Spachtholz (2017) found at https://www.kaggle.com/philippsp/exploratory-analysis-zillowin Kaggle except used building_value label for predictor.
-```{r}
+
+```{r include=FALSE}
 properties <- properties %>% rename(
   id_parcel = parcelid,
   build_year = yearbuilt,
@@ -120,78 +115,76 @@ properties <- properties %>% rename(
 
 ```
 
-Verification of the new column headings.
-```{r}
 
+```{r include=FALSE}
+#Verification of the new column headings.
 head(properties)
 ```
 
-Examine the structure of the properties dataset and confirm feature types.
-```{r}
+
+```{r include=FALSE}
+#Examine the structure of the properties dataset and confirm feature types.
 str(properties)
 ```
 
-Examine the summary of the properties dataset
-```{r}
+
+```{r include=FALSE}
+#Examine the summary of the properties dataset
 summary(properties)
 ```
 
 
-Check for duplicate columns.  Here area_total_calc and area_total_finished appear similar
-```{r}
+One component of the exploratory data analysis was to check for duplicate features and values.  There were two columns that appeared similar and they are:  area_total_calc and area_total_finished. This was verified by looking at the head and tail of those columns.   The feature area_total_calc has fewer missing values so I will remove area_total_finished later.
+```{r include=FALSE}
 summary(properties$area_total_calc)
 ```
 
-```{r}
+```{r include=FALSE}
 head(properties$area_total_calc, 50)
 ```
 
-```{r}
+```{r include=FALSE}
 head(properties$area_total_finished, 50)
 ```
 
-```{r}
+```{r include=FALSE}
 tail(properties$area_total_finished, 100)
 ```
 
-```{r}
+```{r include=FALSE}
 tail(properties$area_total_finished, 100)
 ```
 
-```{r}
+```{r include=FALSE}
 summary(properties$area_total_finished)
 ```
-The features area_total_finished and area_total_calc have similar values, however area_total_calc has fewer missing values so I Will remove area_total_finished later.
 
+I also checked the response variable building_value for missing values, to see how many there were.
 ```{r}
-# Calculate the number of missing values for response variable which is building_value.
 sum(is.na(properties$building_value)) 
 ```
+There were 54,982 observations with missing vaues.  I decided to delete the rows with missing values for response feature as they are only 2% of the rows in the data set.  This code is from Clemens (2018).  Then I created a new dataset without missing values.
 
-```{r}
-#Delete the rows with missing values for response feature as they are only 2% of the rows in the data set.  This Code is from clemens (2018) at https://stackoverflow.com/questions/48658832/how-to-remove-row-if-it-has-a-na-value-one-certain-column.  
-#Create a new object without missing values
+```{r include=FALSE}
 properties_no_building_na <- filter(properties[!is.na(properties$building_value), ]) 
 rownames(properties_no_building_na) <- 1:nrow(properties_no_building_na) # code from James 2011 at https://stackoverflow.com/questions/7567790/change-the-index-number-of-a-dataframe; This source stated that R would insert rows of NAs anywhere there was a missing index in the sequence.  So to prevent mysterious NAs when removing outliers this command re-indexes the dataframe.
 ```
-```{r}
+```{r include=FALSE}
 tail(properties_no_building_na)
 ```
 
+I verifed that the rows with NA in this column were removed.
 ```{r}
-# to verify that the rows with NA in this column were removed.
 sum(is.na(properties_no_building_na$building_value))
 ```
 
-Check the number of missing values or NAs for each feature.
-```{r}
+```{r include=FALSE}
 require(ggplot2)
 library(purrr)
 ```
 
-```{r}
-#check percent of missing values for all features
-#code below was taken from Walters (2017) at https://www.kaggle.com/captcalculator/a-very-extensive-zillow-exploratory-analysis
+The next step was to check percent of missing values for all features and the code for this step was taken from Walters (2017).
+```{r include=FALSE}
 miss_pct <- map_dbl(properties_no_building_na, function(x) { round((sum(is.na(x)) / length(x)) * 100, 1) })
 miss_pct <- miss_pct[miss_pct > 0]
 data.frame(miss=miss_pct, var=names(miss_pct), row.names=NULL) %>%
@@ -201,21 +194,21 @@ data.frame(miss=miss_pct, var=names(miss_pct), row.names=NULL) %>%
   theme(axis.text.x=element_text(angle=90, hjust=1))
 ```
 
-
-```{r}
+```{r include=FALSE}
 # to view percentages for missing values or NAs
 miss_pct
 ```
 
-The goal is to predict the value of the building based on its structural features.  I had to remove obvious features that are not related to structure based on the definitions of each feature provided in an excel spreadsheet.  The spread sheet with the definitions for each variable was provided on the Zillow website and was taken from https://www.kaggle.com/philippsp/exploratory-analysis-zillow/data, 
+The goal for this project is to predict the value of the building based on its structural features.  I had to remove obvious features that are not related to the structure of the home.  This was determined based on the definitions of each feature provided in an excel spreadsheet.  The spread sheet with the definitions for each variable was provided on the Zillow website and was taken from https://www.kaggle.com/philippsp/exploratory-analysis-zillow/data, 
 
-To remove the non-structural features (including building_year) I used the code below which was taken from https://stackoverflow.com/questions/5234117/how-to-drop-columns-by-name-in-a-data-frame.  I also removed the feature area_live_finished which appears to be a duplicate column of area_total_calc.
+To remove the non-structural features (including building_year) I used the code  from https://stackoverflow.com/questions/5234117/how-to-drop-columns-by-name-in-a-data-frame.  I also removed the feature area_live_finished which appears to be a duplicate column of area_total_calc.
 
 ```{r}
 struct_features_only_data <- within(properties_no_building_na, rm('fips', 'latitude', 'longitude', 'area_lot', 'id_parcel', 'zoning_landuse_county', 'zoning_landuse', 'zoning_property', 'rawcensustractandblock', 'censustractandblock', 'region_county', 'region_city', 'region_zip', 'region_neighbor', 'area_shed', 'tax_total', 'tax_land', 'tax_property', 'tax_year', 'tax_delinquency', 'tax_delinquency_year', 'num_pool', 'area_pool', 'pooltypeid10', 'pooltypeid2', 'pooltypeid7', 'build_year', 'area_live_finished'))
 ```
 
-```{r}
+The new dataset struture is listed below.
+```{r echo=FALSE}
 #view new data set
 str(struct_features_only_data)
 ```
@@ -227,9 +220,8 @@ sum(complete.cases(struct_features_only_data))
 ```
 No complete cases,  I proceeded with exploratory data anaysis (EDA) and data cleansing.
 
-The next step was to examine the amount of missing data in the new working data set with structural features.
-
-```{r}
+The next step was to examine the amount of missing data in the new working data set with structural features only.
+```{r echo=FALSE}
 #Display the features and their percentages of missing values.
 #code below was taken from Walters (2017) at https://www.kaggle.com/captcalculator/a-very-extensive-zillow-exploratory-analysis
 miss_pct <- map_dbl(struct_features_only_data, function(x) { round((sum(is.na(x)) / length(x)) * 100, 1) })
@@ -246,76 +238,77 @@ data.frame(miss=miss_pct, var=names(miss_pct), row.names=NULL) %>%
 miss_pct
 ```
 
-My folowing step was to select the features I wanted to include in the model.  I wanted this model to have the potential to be used for any similar geographical areas, so I focused on the structural features of the building, and excluded geographical and neighborhood features. Also excluded were any structural features which contained 26% or more NAs.  This residual sample set contained 6 features.  The response variable is the building value.  The predictors are the number of bathrooms, the total finished living area, the number of bedrooms, the presence of a fireplace and the presence of a hot tub or spa.
+The next step was to select the features I wanted to include in the model.  I wanted this model to have the potential to be used for any similar geographical areas, so I focused on the structural features of the building, and excluded geographical and neighborhood features. Also excluded were any structural features which contained 26% or more NAs.  This residual sample set contained 6 features.  The response variable is the building value.  The predictors are the number of bathrooms, the total finished living area, the number of bedrooms, the presence of a fireplace and the presence of a hot tub or spa.  The structure and summary of the dataset are shown below.
 
-```{r}
+```{r include=FALSE}
 #keep features 25% or less NA's
 data25percent <- struct_features_only_data[ , c('num_bathroom', 'area_total_calc', 'num_bedroom', 'flag_fireplace', 'flag_tub', 'building_value')]
 ```
 
-```{r}
+```{r echo=FALSE}
 str(data25percent)
 ```
 
-```{r}
+```{r include=FALSE}
 summary(data25percent)
 ```
 
-To run the regression model on this dataframe all the features needed to be a number, therefore, I had to change flag_fireplace and flag_tub to binary features for correlations and regression model.
+In order to run the regression model on this dataframe, all the features must be numeric.  Therefore, I had to change flag_fireplace and flag_tub to binary features for the correlation matrix and the regression model.  The original data set listed the presence of a fire place, hot tub or spa as "true".  I change these character features into a numeric feature where the number one indicated that a fireplace, hot tube or spa were present in the home and zero to indicate otherwise.  Since the homes in this data set are located in Los Angeles, its not surprising that there were few homes with these features.
 
-```{r}
+
+```{r include=FALSE}
 data25percent$flag_fireplace <- sub("^$", "false", data25percent$flag_fireplace) # code from Hohenstein https://stackoverflow.com/questions/21243588/replace-blank-cells-with-character
 table(data25percent$flag_fireplace)
 
 ```
 
-```{r}
+```{r echo=FALSE}
 data25percent$flag_fireplace <- ifelse(data25percent$flag_fireplace == "true", 1, 0)
 table(data25percent$flag_fireplace)
 ```
 
-```{r}
+```{r include=FALSE}
 #verifying transition to binary numbers
 tail(data25percent)
 ```
 
-Changing the feature flag_tub to binary feature.
-```{r}
+
+```{r include=FALSE}
+#Changing the feature flag_tub to binary feature.
 data25percent$flag_tub <- sub("^$", "false", data25percent$flag_tub)
 table(data25percent$flag_tub)
 ```
 
-```{r}
+```{r echo=FALSE}
 data25percent$flag_tub <- ifelse(data25percent$flag_tub == "true", 1, 0)
 table(data25percent$flag_tub)
 ```
 
 Verifying the change to numeric.
-```{r}
+```{r echo=FALSE}
 head(data25percent)
 ```
 
 I then checked the class type of each variable in preparation for regression modeling.
-```{r}
+```{r echo=FALSE}
 #checking the class type of each variable in preparation for regression modeling.
 sapply(data25percent, class)
 ```
 
-### Determine correlations among features
+## Correlations 
 
 I ran a correlation matrix on the first dataset to see which features had a mild correlation with the response variable "building value".  This correlation shows that three predictors had at least a weak to moderate correlation. They are the number of bedrooms, the number of bathrooms and the area_total_calc.  According to Lantz (2015, p. 180) in the Chapter on Regression Methods, a weak correlation are values between 0.1 and 0.3, where as a moderate correlation is between 0.3 and 0.5.  Strong correlations are values above 0.5. Despite these recommendations, I used all 5 predictors for the linear model to see how this played out.  The code was taken from RDocumentation at https://www.rdocumentation.org/packages/stats/versions/3.5.0/topics/cor.
 
-```{r}
+```{r echo=FALSE}
 cor(data25percent, use = "pairwise.complete.obs")
 ```
 
-### Remove outliers
+## Outliers
 
-The next step was to remove the outliers within each feature.  During this phase I encountered a bug in R studio.  As I was removing the outliers for each feature, new NAs were added to other features in the form of new rows.  I could see this in the summary of the data set.  I tried the suggested remedies found on stack flow post at https://stackoverflow.com/questions/14261619/subsetting-r-data-frame-results-in-mysterious-na-rows, such as using the filter(), using the subset() and recounting the rows but was unsuccessful. 
+The next step was to remove the outliers within each feature.  During this phase I encountered a bug in R studio.  As I was removing the outliers for each feature, new NAs were added to other features in the form of new rows.  I could see this in the summary of the data set.  I tried the suggested remedies found on a Stackoverflow post at Subsetting R dataframe results in mysterious NA rows (n.d), such as using the filter(), using the subset() and recounting the rows but was unsuccessful. 
 
-I decided to use an outlier function I found on the internet and planned to removed all NAs since I had a large number of observations.  I used a function from Dhana (2016) to remove outliers at https://www.r-bloggers.com/identify-describe-plot-and-remove-the-outliers-from-the-dataset/y.
-
-```{r}
+I decided to use an outlier function I found on the internet and planned to removed all NAs since I had a large number of observations.  I used a function from Dhana (2016) to remove outliers.  This function provideds the mean, bloxplots and histogram before and after the outliers are remove.  It will seek a response to the question "Do you want to replace outliers with NAs".  Once this is answered in the console it completes the function.
+```{r include=FALSE}
 outlierKD <- function(dt, var) {
      var_name <- eval(substitute(var),eval(dt))
      na1 <- sum(is.na(var_name))
@@ -349,37 +342,38 @@ outlierKD <- function(dt, var) {
 }
 ```
 
-```{r}
+The outlier function applied to the building value and displayed in the graphs below
+```{r echo=FALSE, fig.width=4, fig.height=4}
 outlierKD(data25percent, building_value)
 ```
-The above plots show the boxplots and histogram before and after the outliers were removed.  The histogram after the building_outliers were removed is skewed to the right.
+The above plots show the boxplots and histogram before and after the outliers were removed.  The histogram after the building_value were removed is skewed to the right.
 
-The outliers are remvoed from the num_bathroom features.
-```{r}
+The outliers are remvoed from the num_bathroom features and shown in the graphs below
+```{r echo=FALSE, fig.width=4, fig.height=4}
 outlierKD(data25percent, num_bathroom)
 ```
 
 Check the summary to confirm outliers are remoed.
-```{r}
+```{r echo=FALSE}
 summary(data25percent)
 ```
 
-Removing outliers from area_total_calc with function
-```{r}
+Removing outliers from area_total_calc with function and are shown in the graphs below.
+```{r echo=FALSE, fig.width=4, fig.height=4}
 outlierKD(data25percent, area_total_calc)
 ```
 
-Remove outliers from num_bedroom with function
-```{r}
+Remove outliers from num_bedroom with function and shown in the graphs below.
+```{r echo=FALSE, fig.width=4, fig.height=4}
 outlierKD(data25percent, num_bedroom)
 ```
 
 Check the summary after all outliers were removed.
-```{r}
+```{r echo=FALSE}
 summary(data25percent)
 ```
 
-```{r}
+```{r include=FALSE}
 str(data25percent)
 ```
 
@@ -390,129 +384,126 @@ The next step was to identify the number of complete cases after outliers have b
 sum(complete.cases(data25percent))
 ```
 
-create a new dataframe with complete cases
-```{r}
+Then a new dataframe with complete cases was created.
+```{r include=FALSE}
 complete_data25percent <- na.omit(data25percent)
 ```
 
 Confirm the structure of the latest dataset.
-```{r}
+```{r echo=FALSE}
 str(complete_data25percent)
 ```
 
+
 Recheck correlation with clean dataframe complete_data25percent
 
-```{r}
+```{r echo=FALSE}
 cor(complete_data25percent)
 ```
-The correlation between the num_bedroom and the building value improved, otherwise the same.
+The correlation between the num_bedroom and the building value improved, otherwise it is the same.
 
-## Linear regression Models
+# Regression Models And Analysis
 
-Installing necessary packages for model
-```{r}
-install.packages("MASS")
+The next step in the process was to run a multiple linear regression model.  The lm() function from the MASS library was utilized for this step.  In this model the building value is the response variable and the other features are the predictors. 
+
+```{r include=FALSE}
 library(MASS)
 ```
 
-Another look at the summary of dataset.
-```{r}
+```{r include=FALSE}
 summary(complete_data25percent)
 ```
 
 
 The first model I ran was the linear model code with lm() on the entire dataset to see if it would work.
-```{r}
+```{r echo=FALSE}
 model_1 <- lm(building_value ~ ., data = complete_data25percent)
 ```
 
-Then, I viewed the summary and was dissapointed with the adjusted R_squared.
-```{r}
+Then, I viewed the summary and was dissapointed with the adjusted R_squared and residual errors.
+```{r echo=FALSE}
 summary(model_1)
 ```
 
-I checked the AIC score for comparison with later models as described by Prabhakaran, S. (2017).  Linear Regression.  R-statistics.co.  Retrieved from http://r-statistics.co/Linear-Regression.html
+I checked the AIC score for comparison with later models as described by Prabhakaran, S. (2017). 
 
 ```{r}
 AIC(model_1)
 ```
 
-
-
-The next step was to create diagnostic plot of the regression model
+The next step was to create diagnostic plot of the regression model. Interpreting the plots is difficult with such a large number of observations but seems to show that the model had a fairly good fit with the data and there were no outliers outside of Cook's distance.
 ```{r}
-par(mfrow=c(2,2))
-plot(model_1)
+# not enough memory on computer to run during knit process
+# par(mfrow=c(2,2))
+# plot(model_1)
 
 ```
 
-Interpreting the above plots is difficulty with such a large number of observations but seems to show the the model had a fairly good fit with the data and there were no outliers outside of Cook's distance.
+## Create Training and Test Set
 
-## Create training and test dataframe to analyze model performance
-
-I used the code from Prabhakaran (2017) http://r-statistics.co/Linear-Regression.html create the training and test datasets.
-
-```{r}
+I used the code from Prabhakaran (2017) to create the training and test datasets. The training and test sets consisted of an 80 : 20 split.  
+```{r include=FALSE}
 set.seed(100)
 trainingRowIndex <- sample(1:nrow(complete_data25percent), 0.8*nrow(complete_data25percent))
 ```
 
-
-```{r}
+```{r include=FALSE}
 trainingData <- complete_data25percent[trainingRowIndex, ]
 ```
 
 
-```{r}
+```{r include=FALSE}
 head(trainingData)
 ```
 
 I then checked the structure of the training data to confirm the correct number of rows.
-```{r}
+```{r echo=FALSE}
 str(trainingData)
 ```
 
 
-```{r}
+```{r include=FALSE}
 testData  <- complete_data25percent[-trainingRowIndex, ]
 ```
 
-```{r}
+```{r include=FALSE}
 head(testData)
 ```
 
-Build the model on the training data set
-```{r}
+The next step was to build the model on the training data set and view the summary.
+```{r include=FALSE}
 model_2 <- lm(building_value ~ ., data=trainingData)
 ```
 
-```{r}
+```{r echo=FALSE}
 summary(model_2)
 ```
-The above summary is similar to the above linear model.  Next, I ran the AIC and BIC scores to compare with the first model.
+
+The results from the this model are shown above.  The Adjusted R-square is 0.4359.  This model explains 43.6% of the variation in the dependent variable (Lantz, 2015).  I had hoped this value to be higher.  The majority of the predictions are between the 1st and 3rd quartile, and were between 36,507 over the true value and 32,351 under the true value  (Lantz, 2015).  The overall model  appears to be statistically significant (Prabhakaran 2017) as evidenced by the p values for each predictor and the F-statistic for the model which are less than the significance level of 0.05.
+
+I then ran the AIC and BIC scores to compare with the first model.
 
 ```{r}
 AIC(model_2)
 ```
-The score improved.
+The AIC score improved.
 
 ```{r}
 BIC(model_2)
 ```
 
-Next, I ran the model on test data
+Next, I ran the model on test data to get the predictions.
 ```{r}
 building_valuePred <- predict(model_2, testData)
 ```
 
 
-```{r}
+```{r include=FALSE}
 summary(building_valuePred)
 ```
 
-Then it was time to calculate the prediction accuracy according to Prabhakaran, S. (2017).
-
-Make a dataframe with the actual test values of building_value and the predicted building_values
+The next step was to look at the accuracy of the predicted values.  According to Prabhakaran (2017), there are several measures which can be used to look at prediction accuracy.  Two of them are shown here.  The first measure is the correlation between the actual values and the predicted values.  According to this source, a good correlation  "implies that the actual values and the predicted values show similar directional movement" (Prabhakaran, 2017) , which is seen here. 
+The first step was to make a dataframe with the actual test values of building_value and the predicted building_values.
 ```{r}
 actuals_preds <- data.frame(cbind(actuals=testData$building_value, predicteds=building_valuePred)) 
 ```
@@ -522,97 +513,107 @@ correlation_accuracy <- cor(actuals_preds)
 head(actuals_preds)
 ```
 
-
+The correlation accuracy as shown below.
 ```{r}
 correlation_accuracy
 ```
+The above correlation between the actual values and the predicted is considered good by Lantz (2015).
 
-Find the min_max_accuracy as recommended by Prabhakaran, S. (2017).
-```{r}
+The second value is the  Min Max Accuracy.  The closer the higher the score the better according to Prabhakaran (2017).  The Min Max Accuracy score was 0.71.
+
+```{r include=FALSE}
 min_max_accuracy <- mean(apply(actuals_preds, 1, min) / apply(actuals_preds, 1, max)) 
 ```
 
-```{r}
+```{r include=FALSE}
 min_max_accuracy
 ```
 
 
-Next, I check for multi-colinearity of the regression model using the vif function:
-```{r}
+Next, I checked for multi-colinearity of the regression model using the vif function:
+```{r include=FALSE}
 library(car)
 
 ```
 
-```{r}
+```{r echo=FALSE}
 vif(model_2)
 ```
 There was no multi-colinearity.
 
-The next phase consisted of exploring different linear model functions to see if it changed the overall performance.  I started with the lm with cross Validation as suggested by as recommended by Prabhakaran, S. (2017).  I chose to use the Caret package for the lm with cross validation.
+### Various Linear Regression Models
 
-```{r}
-install.packages("caret")
+### LM with Cross Validation
+The next phase consisted of exploring different linear model functions to see if it changed the overall performance.  I started with the lm with cross Validation as suggested by Prabhakaran (2017).  I chose to use the Caret package for the lm with cross validation.
+
+```{r include=FALSE}
 library(caret)
 ```
 
-```{r}
+```{r include=FALSE}
 set.seed(100)
 ```
 
 
-The following code was taken from Datacamp (2016) at https://www.youtube.com/watch?v=OwPQHmiJURI.
-```{r}
-model3_caret <- train(building_value ~ ., trainingData, method = "lm", trControl = trainControl(method = "cv",  number = 10, verboseIter = TRUE))
+The following code for the linear model with cross validation was taken from Datacamp (2016) at https://www.youtube.com/watch?v=OwPQHmiJURI.
+```{r include=FALSE}
+model3_caret <- train(building_value ~ ., trainingData, method = "lm", trControl = trainControl(method = "cv",  number = 10, verboseIter = FALSE))
 ```
 
-```{r}
+```{r include=FALSE}
 print(model3_caret)
 ```
 
-```{r}
+```{r echo=FALSE}
 summary(model3_caret)
 ```
 The results of the above model were consistant with the previous models.  Next, I looked at the variable importance for the above model since it was within the caret package.
 
-Checking variable importance for model3_caret code from https://www.analyticsvidhya.com/blog/2016/12/practical-guide-to-implement-machine-learning-with-caret-package-in-r-with-practice-problem/
+### Variable Importance
 
-```{r}
+One of my objectives for this project was to identify which features were most important in the prediction model.  This was achieve with the variable importance function in the caret package as described by Kaushik (2016).  The results showed that the Total finished Living Area was the most important feature followed by the number of bathrooms and then the number of bedrooms.  Hot tubs and fireplaces were, as expected for the warm climate of Los Angeles, very low value predictors.
+
+```{r echo=FALSE}
 varImp(object = model3_caret)
 ```
 
-Created a plot Variable importance for model3_caret
-```{r}
+```{r echo=FALSE, fig.width=4, fig.height=4}
 plot(varImp(object=model3_caret),main="Variable Importance")
 ```
 
+
+### GLMNET
 Next, I decided to try the glmnet() in Caret to see if this model performed better.  This is a generalized linear model with regularization techniques.
-```{r}
+```{r include=FALSE}
 set.seed(100)
 ```
 
-```{r}
+```{r include=FALSE}
 library(caret)
 glmnet1 <- train(building_value ~ ., trainingData, method = "glmnet", trControl = trainControl(method = "cv",  number = 10, verboseIter = FALSE))
 ```
 
-```{r}
+```{r echo=FALSE}
 glmnet1
 ```
-The above summary found similar RMSE and R-aquared values.
+The above summary showed similar RMSE and R-aquared values.
 
 
+# Improve Model
+
+### Removing Features
 I decided to experiment with the dataset to see if I could improve the performance by altering the number of features in the dataset.  I first tried removing features one by one to see if it improves the model.  I decided to use the Caret package for this.  The following code was taken from Datacamp (2016) at https://www.youtube.com/watch?v=OwPQHmiJURI.
 
 ```{r}
-model4_caret <- train(building_value ~ area_total_calc + num_bedroom + num_bathroom, trainingData, method = "lm", trControl = trainControl(method = "cv",  number = 10, verboseIter = TRUE))
+model4_caret <- train(building_value ~ area_total_calc + num_bedroom + num_bathroom, trainingData, method = "lm", trControl = trainControl(method = "cv",  number = 10, verboseIter = FALSE))
 ```
 
-```{r}
+```{r include=FALSE}
 model4_caret
 ```
 
 
-```{r}
+```{r echo=FALSE}
 summary(model4_caret)
 ```
 
@@ -623,120 +624,124 @@ I also used the glmnet package in caret on with the 3 independent variables
 glmnet2 <- train(building_value ~ area_total_calc + num_bedroom + num_bathroom, trainingData, method = "glmnet", trControl = trainControl(method = "cv",  number = 10, verboseIter = FALSE))
 ```
 
-```{r}
+```{r echo=FALSE}
 print(glmnet2)
 ```
 
-Next, I ran model with 2 independent variables, just to experiment with things.
+Next, I ran model with 2 independent variables, just to experiment.
 ```{r}
 model5_caret <- train(building_value ~ area_total_calc + num_bedroom, trainingData, method = "lm", trControl = trainControl(method = "cv",  number = 10, verboseIter = FALSE))
 ```
 
-```{r}
+```{r echo=FALSE}
 print(model5_caret)
 ```
-Less features results in higher RMSE and Rsquared, which is not improving the model.  It was time to try adding more features.
+Less features results in higher RMSE and Rsquared, which is not improving the model.  It was time to try adding more features instead.
 
-### Adding 3 New Features 
-I added heating, num-unit, quality into a new dataframe to try to improve the model.
+### Adding Features
+I redefined my sample set to include a few more features.   I went back to see which features contained NAs between 25% and 50% and found three more I could add into a new sample set.  Those three were the type of home heating, the quality or condition of the building and the number of units built into the structure such as a duplex or triplex. I added heating, num-unit, quality into a new dataframe to try to improve the model.  Then, I repeated the process for cleaning the second data set.
+
 ```{r}
 dataset_2 <- struct_features_only_data[ , c('num_bathroom', 'area_total_calc', 'num_bedroom', 'flag_fireplace', 'flag_tub', 'building_value', 'heating', 'num_unit', 'quality')]
 ```
 
-```{r}
+```{r include=FALSE}
 str(dataset_2)
 ```
 ```{r}
 table(dataset_2$flag_fireplace)
 ```
 
-### Repeat data cleansing
-Need to change flag_fireplace and flag_tub to binary features.
-
-```{r}
+```{r include=FALSE}
+#Need to change flag_fireplace and flag_tub to binary features.
 dataset_2$flag_fireplace <- sub("^$", "false", dataset_2$flag_fireplace) # code from Hohenstein https://stackoverflow.com/questions/21243588/replace-blank-cells-with-character
 table(dataset_2$flag_fireplace)
 
 ```
 
-```{r}
+```{r include=FALSE}
 dataset_2$flag_fireplace <- ifelse(dataset_2$flag_fireplace == "true", 1, 0)
 table(dataset_2$flag_fireplace)
 ```
 
-```{r}
+```{r include=FALSE}
 dataset_2$flag_tub <- sub("^$", "false", dataset_2$flag_tub)
 table(dataset_2$flag_tub)
 ```
 
-```{r}
+```{r include=FALSE}
 dataset_2$flag_tub <- ifelse(dataset_2$flag_tub == "true", 1, 0)
 table(dataset_2$flag_tub)
 ```
 
 
-```{r}
+```{r include=FALSE}
 #checking the class type of each variable
 sapply(dataset_2, class)
 ```
 
 
 Checking correlation of new data set
-```{r}
+```{r echo=FALSE}
 cor(dataset_2, use = "pairwise.complete.obs")
 ```
 
-```{r}
+```{r include=FALSE}
 summary(dataset_2)
 ```
 
-### Remove Outliers from new dataset which is dataset_2
-Removing outliers from num_bathroom
 
-```{r}
+```{r include=FALSE}
+#Removing outliers from num_bathroom
 outlierKD(dataset_2, num_bathroom)
 ```
 
-removing outliers from area_total_calc
-```{r}
+
+```{r include=FALSE}
+#removing outliers from area_total_calc
 outlierKD(dataset_2, area_total_calc)
 ```
 
-removing outliers from num_bedroom
-```{r}
+
+```{r include=FALSE}
+#removing outliers from num_bedroom
 outlierKD(dataset_2, num_bedroom)
 ```
 
-Removing outliers from building_value
-```{r}
+
+```{r include=FALSE}
+#Removing outliers from building_value
 outlierKD(dataset_2, building_value)
 ```
 
-Removing outliers from heating
-```{r}
+
+```{r include=FALSE}
+#Removing outliers from heating
 outlierKD(dataset_2, heating)
 ```
 
-```{r}
+```{r include=FALSE}
 summary(dataset_2$num_unit)
 ```
 
-Removing outliers from num_unit.
-```{r}
+```{r include=FALSE}
+#Removing outliers from num_unit.
 outlierKD(dataset_2, num_unit)
 ```
 
-Removing outliers quality feature.
-```{r}
+
+```{r include=FALSE}
+#Removing outliers quality feature.
 summary(dataset_2$quality)
 ```
 
 
-```{r}
+```{r include=FALSE}
 outlierKD(dataset_2, quality)
 ```
 
-```{r}
+A summary of the data set at this point is shown below.
+```{r echo=FALSE}
 summary(dataset_2)
 ```
 
@@ -745,77 +750,79 @@ Next, I identified number of complete cases.
 sum(complete.cases(dataset_2))
 ```
 
-```{r}
+```{r include=FALSE}
 str(dataset_2)
 ```
-
 
 Then, I removed incomplete cases from the second data set.
 ```{r}
 dataset_2_complete <- na.omit(dataset_2)
 ```
 
-```{r}
+```{r include=FALSE}
 str(dataset_2_complete)
 ```
 
-```{r}
+I checked the summary of the second data set.
+```{r echo=FALSE}
 #verifying that NAs are removed
 summary(dataset_2_complete)
 ```
 
-
-### Split training and test on dataset_2_complete
-```{r}
+A training set and a test set were created with an 80:20 split.
+```{r include=FALSE}
 set.seed(100)
 trainingRowIndex2 <- sample(1:nrow(dataset_2_complete), 0.8*nrow(dataset_2_complete))
 ```
 
 
-```{r}
+```{r include=FALSE}
 trainingData2 <- dataset_2_complete[trainingRowIndex2, ]
 ```
 
-```{r}
+```{r include=FALSE}
 testData2  <- dataset_2_complete[-trainingRowIndex2, ]
 ```
 
 
-## Linear regression on trainingData2
-```{r}
+### Linear Regression on trainingData2
+
+Once the second data set was cleaned I was ready to run the regression models again using the same functions as I did with initial data set.
+```{r include=FALSE}
 fit_A <- lm(building_value ~ ., data=trainingData2)
 ```
 
-```{r}
+```{r echo=FALSE}
 summary(fit_A)
 ```
-Noted some improvement in the RSE and Adjusted R-square.  flag_fireplace and num_unit are not significant predictors, so will remove them.
-Remove num_unit and flag_fireplace 
-```{r}
+I noted some improvement in the RSE and Adjusted R-square.  The features, flag_fireplace and num_unit are not significant predictors, so I removed them from the data set and updated the train and test set.
+
+```{r include=FALSE}
+#Remove num_unit and flag_fireplace 
 trainingData3 <- within(trainingData2, rm('num_unit', 'flag_fireplace')) 
 ```
 
 
-```{r}
+```{r include=FALSE}
 testData3 <- within(testData2, rm('num_unit', 'flag_fireplace'))
 ```
 
-Checking structure of new training set
-```{r}
+The structure of new training set.
+```{r echo=FALSE}
 str(trainingData3)
 ```
 
-Next, I ran the lm() on the second dataset with more predictors.
-```{r}
+Next, I ran the lm() on the revised dataset.
+```{r include=FALSE}
 fit_C <- lm(building_value ~ ., data=trainingData3)
 ```
 
-
-
-```{r}
+```{r echo=FALSE}
 summary(fit_C)
 ```
 The results of the lm model haven't changed with the removal of the flag_fireplace and num_unit.
+
+### Calcualte Metrics
 
 Calcuating AIC and BIC on the model with 6 predictors.
 ```{r}
@@ -825,10 +832,9 @@ AIC(fit_C)
 ```{r}
 BIC(fit_C)
 ```
-AIC and BIC values improved compared to initial dataset.
+AIC and BIC values improved compared to initial dataset with 5 predictors.
 
-
-Run model on testData3 set.
+The next step was to run the model on testData3 set to get predictions.
 
 ```{r}
 building_valuePred3 <- predict(fit_C, testData3)
@@ -838,79 +844,109 @@ building_valuePred3 <- predict(fit_C, testData3)
 summary(building_valuePred3)
 ```
 
+The prediction accuracy metrics were then calcuated for a comparison.
 
-NExt, it was time to calculate prediction accuracy for comparison.
-Make a dataframe with the actual test values of building_value and the predicted building_values
-```{r}
+```{r include=FALSE}
+#Make a dataframe with the actual test values of building_value and the predicted building_values
 actuals_preds3 <- data.frame(cbind(actuals=testData3$building_value, predicteds=building_valuePred3)) 
 ```
 
-```{r}
+
+```{r include=FALSE}
 correlation_accuracy3 <- cor(actuals_preds3)
 head(actuals_preds)
 ```
-
-```{r}
+The correlation accuracy improved to 0.70 and the Min Max Accuracy improved to 0.72,
+```{r include=FALSE}
 correlation_accuracy3
 ```
-There is a slight improvement in the correlation accuracy.
+Check the min_max_accuracy.
 
-Check the min_max_accuracy by http://r-statistics.co/Linear-Regression.html
-
-```{r}
+```{r include=FALSE}
 min_max_accuracy2 <- mean(apply(actuals_preds3, 1, min) / apply(actuals_preds3, 1, max)) 
 ```
 
-```{r}
+```{r include=FALSE}
 min_max_accuracy2
 ```
-There is slight improvement in the MinMax Accuracy metric.
 
-Check model performance using lm with cross validation on second dataset.
+### LM with Cross Validation on 6 Predictors
+The following step is to check model performance using lm with cross validation on second dataset.
 ```{r}
 Fit_B_lm <- train(building_value ~ ., trainingData3, method = "lm", trControl = trainControl(method = "cv",  number = 10, verboseIter = FALSE))
 ```
 
-```{r}
+```{r echo=FALSE}
 print(Fit_B_lm)
 ```
-Similar results to lm().
+The above results are Similar results to lm().
 
-```{r}
+I also looked for muti-colinearity
+```{r echo=FALSE}
 vif(fit_C)
 ```
+There is no multi-colinearity.
 
-No multi-colinearity.
 
-
-Using glmnet on second dataset
-```{r}
+I also ran the glmnet function on second dataset and the results were similar.
+```{r include=FALSE}
 Fit_C_glmnet <- train(building_value ~ ., trainingData3, method = "glmnet", trControl = trainControl(method = "cv",  number = 10, verboseIter = FALSE))
 ```
 
-```{r}
+```{r include=FALSE}
 print(Fit_C_glmnet)
 ```
 Results are consistent.
 
-
-```{r}
+I rechecked the variable importance on the model from the second data set and created a plot.
+```{r include=FALSE}
 varImp(object = Fit_B_lm)
 ```
 
-
-Plotting Variable importance for model3_caret
-```{r}
+```{r echo=FALSE}
 plot(varImp(object=Fit_B_lm),main="Variable Importance New Data Frame")
 ```
 The above plot is similar to the first variable importance plot where area_total_calc has the highest importance, followed by the quality feature and then the num_bathroom.
 
-In conclusion, a multiple linear regression model was created to predict the value of a home.  The results of the model improved when more features were added to the dataset.  The type of linear function utlized did not alter the performance of the model.  The model with the best performance was the one with the second data set which had 6 predictors.  However, this model requires more work before it can be published for proprietary use.
 
-Several options are available which may help improve this prediction model furhter.  First, You could continuing to add more features, but by including more structural features there will be more NAs to deal with.  Also, consideration should be give to  imputing values or removing more rows with NAs since there is a large number of observations.  Next, manipulating the tuning parameters within regression model fucntion maybe improve results. Another option is to  find a better data set with fewer missing values.  Lastly, to make this model more useful throughout similar geographical areas, additional real estate data from other geographical areas could be obtained and aggregated with the Los Angeles Data.
 
-# Appendix
-I did some xperimenting with lm() with log of response variable as shown in the steps below.  However, I am not as compfortable manipulating or interpreting the log value, so I did not include it in the discussion.
+
+![Comparison of Regression Models.](C:\Users\maria\Desktop\Practicum 1\comparisonchart.PNG)
+
+## Discussion
+In conclusion, a multiple linear regression model was created to predict the value of a home.  The results of the model improved when more features were added to the dataset.  The type of linear function utlized did not alter the performance of the model, but note that the tuning parameters were not adjusted.  The model with the best performance was the one with the second data set which had 6 predictors.  However, this model requires more work before it can be published for proprietary use as the performance is not satifactory.
+
+Several options are available which may help improve this prediction model furhter.  First, You could continuing to add more features, but by including more structural features there will be more NAs to deal with.  Also, consideration should be give to imputing values or removing more rows with NAs since there is a large number of observations.  Next, manipulating the tuning parameters within regression model fucntion maybe improve results. Another option is to  find a better data set with fewer missing values.  Lastly, to make this model more useful throughout similar geographical areas, additional real estate data from other geographical areas could be obtained and aggregated with the Los Angeles Data.
+
+## References
+
+Clemens (2018) Retrieved from https://stackoverflow.com/questions/48658832/how-to-remove-row-if-it-has-a-na-value-one-certain-column.
+
+Datacamp (2016) Retrieved from https://www.youtube.com/watch?v=OwPQHmiJURI
+
+Dhana, K. (2016).  Identify, describe, plot, and remove the outliers from the dataset.  Retrieved from https://www.r-bloggers.com/identify-describe-plot-and-remove-the-outliers-from-the-dataset/y
+
+James (2011) Retrieved from  https://stackoverflow.com/questions/7567790/change-the-index-number-of-a-dataframe;
+
+Kaushik, S. (2016). Practical guide to implement machine learning with CARET package in R (with practice problem).  Analytics Vidhya.  Retrieved from https://www.analyticsvidhya.com/blog/2016/12/practical-guide-to-implement-machine-learning-with-caret-package-in-r-with-practice-problem/
+
+Lantz, B. (2015). Chapter 6: Forecasting Numeric Data - Regression Methods.  In B. Lantz, Machine Learning with R Second Edition - Classification Using Decision Trees and Rules (pp. 171-218).   Packt Publishing.
+
+Prabhakaran, S. (2017).  Linear Regression.  R-statistics.co.  Retrieved from http://r-statistics.co/Linear-Regression.html
+
+RDocumentation (n.d.) Retrieved from https://www.rdocumentation.org/packages/stats/versions/3.5.0/topics/cor.
+
+Spachtholz (2017) Retrieved from https://www.kaggle.com/philippsp/exploratory-analysis-zillow
+
+Subsetting R data frame results in mysterious NA rows (n.d) Retrieved from https://stackoverflow.com/questions/14261619/subsetting-r-data-frame-results-in-mysterious-na-rows
+
+
+Walters, T. (2017). A very extensive Zillow exploratory analysis.  Retrieved from https://www.kaggle.com/captcalculator/a-very-extensive-zillow-exploratory-analysis
+
+Zillow Prize:  Zillow's Home Value Prediction(Zestimate) (2018).  Properties_2016.  Retrieved from https://www.kaggle.com/c/zillow-prize-1/data
+
+### Appendix
+I ran the lm() with log of response variable as shown in the steps below.  However, I am not as compfortable manipulating or interpreting the log value, so I did not include it in the discussion.
 
 ```{r}
 m2 <- lm(log(building_value) ~ ., data = trainingData)
