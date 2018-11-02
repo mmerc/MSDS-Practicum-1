@@ -12,9 +12,6 @@ There were several objectives I wanted to acheive during this project.  First, I
 ## PDF Report
 A detailed PDF file on this project can be found at https://github.com/mmerc/MSDS-Practicum-1/blob/master/MercierFinalPracticum1.2.pdf
 
-## Summary Video
-The video presentation of this project can be viewed at https://www.youtube.com/watch?v=-yyfe9LdPDc&feature=youtu.be.
 
-Thank you and I look forward to your comments and questions.
 
 
